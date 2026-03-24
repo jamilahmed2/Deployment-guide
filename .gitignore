@@ -14,7 +14,8 @@ build/
 .cache/
 dist/
 out/
-
+package-lock.json
+./package-lock.json
 # Credentials & secrets
 .env
 credentials.json
