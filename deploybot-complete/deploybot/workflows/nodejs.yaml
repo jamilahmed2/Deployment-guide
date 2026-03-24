@@ -1,0 +1,97 @@
+# workflows/nodejs.yaml
+# Config-driven deployment workflow for Node.js apps
+name: "Node.js Production Deployment"
+version: "1.0"
+stack: node
+
+defaults:
+  app_port: 3000
+  node_version: lts
+  branch: main
+  enable_ssl: true
+  use_pm2: true
+
+phases:
+  setup:
+    description: "System preparation and package installation"
+    steps:
+      - name: update_apt
+        command: "apt-get update -qq"
+        sudo: true
+        timeout: 120
+      - name: install_base
+        command: "apt-get install -y curl wget git unzip"
+        sudo: true
+        timeout: 180
+
+  install:
+    description: "Install Node.js and global tools"
+    steps:
+      - name: install_nvm
+        command: >
+          curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash &&
+          export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" &&
+          nvm install {{ node_version }} && nvm alias default {{ node_version }}
+        timeout: 300
+      - name: install_pm2
+        command: >
+          export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" &&
+          npm install -g pm2
+        timeout: 120
+
+  configure:
+    description: "Clone repo and configure environment"
+    steps:
+      - name: clone_repo
+        command: >
+          git clone --branch {{ branch }} {{ repo_url }} {{ project_path }} 2>/dev/null ||
+          (cd {{ project_path }} && git pull origin {{ branch }})
+        condition: "{{ repo_url is defined }}"
+        timeout: 300
+      - name: write_env
+        command: "cat > {{ project_path }}/.env << 'EOF'\n{{ env_content }}\nEOF"
+
+  deploy:
+    description: "Install dependencies, build, and start"
+    steps:
+      - name: npm_install
+        command: "cd {{ project_path }} && npm install --production"
+        timeout: 300
+      - name: npm_build
+        command: "cd {{ project_path }} && npm run build"
+        timeout: 300
+      - name: pm2_start
+        command: >
+          cd {{ project_path }} &&
+          pm2 describe {{ app_name }} > /dev/null 2>&1 &&
+          pm2 restart {{ app_name }} ||
+          pm2 start npm --name "{{ app_name }}" -- run start
+
+  secure:
+    description: "NGINX reverse proxy and SSL certificate"
+    steps:
+      - name: install_nginx
+        command: "apt-get install -y nginx"
+        sudo: true
+      - name: write_nginx_config
+        command: "cat > /etc/nginx/sites-available/{{ domain }} << 'EOF'\n{{ nginx_config }}\nEOF"
+        sudo: true
+      - name: enable_site
+        command: "ln -sf /etc/nginx/sites-available/{{ domain }} /etc/nginx/sites-enabled/"
+        sudo: true
+      - name: test_nginx
+        command: "nginx -t"
+        sudo: true
+      - name: restart_nginx
+        command: "systemctl restart nginx"
+        sudo: true
+      - name: install_certbot
+        command: "apt-get install -y certbot python3-certbot-nginx"
+        sudo: true
+        condition: "{{ enable_ssl }}"
+      - name: issue_ssl
+        command: "certbot --nginx -d {{ domain }} --non-interactive --agree-tos --email admin@{{ domain }} --redirect"
+        sudo: true
+        condition: "{{ enable_ssl }}"
+        timeout: 120
+        retries: 2

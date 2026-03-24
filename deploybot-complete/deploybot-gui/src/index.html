@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeployBot Desktop</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="brand">
+                    <div class="brand-ascii">
+                        <pre>██████╗ ███████╗██████╗ ██╗      ██████╗ ██╗   ██╗██████╗  ██████╗ ████████╗
+██╔══██╗██╔════╝██╔══██╗██║     ██╔═══██╗╚██╗ ██╔╝██╔══██╗██╔═══██╗╚══██╔══╝
+██║  ██║█████╗  ██████╔╝██║     ██║   ██║ ╚████╔╝ ██████╔╝██║   ██║   ██║
+██║  ██║██╔══╝  ██╔═══╝ ██║     ██║   ██║  ╚██╔╝  ██╔══██╗██║   ██║   ██║
+██████╔╝███████╗██║     ███████╗╚██████╔╝   ██║   ██████╔╝╚██████╔╝   ██║
+╚═════╝ ╚══════╝╚═╝     ╚══════╝ ╚═════╝    ╚═╝   ╚═════╝  ╚═════╝    ╚═╝</pre>
+                    </div>
+                    <div class="brand-meta">
+                        <span class="version">v1.0.0</span>
+                        <span class="status" id="status">READY</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-ghost" id="about-btn">
+                        <span class="icon">ℹ</span>
+                        ABOUT
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-item active" data-tab="deploy">
+                <span class="icon">🚀</span>
+                DEPLOY
+            </button>
+            <button class="nav-item" data-tab="servers">
+                <span class="icon">🖥️</span>
+                SERVERS
+            </button>
+            <button class="nav-item" data-tab="logs">
+                <span class="icon">📋</span>
+                LOGS
+            </button>
+            <button class="nav-item" data-tab="profiles">
+                <span class="icon">📁</span>
+                PROFILES
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Deploy Tab -->
+            <section class="tab-content active" id="deploy-tab">
+                <div class="section-header">
+                    <h2>DEPLOYMENT CONFIGURATION</h2>
+                    <p>Configure and execute automated server deployments</p>
+                </div>
+
+                <form class="deploy-form" id="deploy-form">
+                    <div class="form-grid">
+                        <!-- Server Connection -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <span class="section-icon">🔗</span>
+                                SERVER CONNECTION
+                            </h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="host">HOST/IP *</label>
+                                    <input type="text" id="host" name="host" placeholder="123.45.67.89" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="username">USERNAME</label>
+                                    <input type="text" id="username" name="username" value="root" placeholder="root">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="auth-method">AUTH METHOD</label>
+                                    <select id="auth-method" name="authMethod">
+                                        <option value="key">SSH Key</option>
+                                        <option value="password">Password</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="key-group">
+                                    <label for="key-path">KEY PATH</label>
+                                    <div class="input-with-button">
+                                        <input type="text" id="key-path" name="keyPath" placeholder="~/.ssh/id_rsa">
+                                        <button type="button" class="btn btn-secondary" id="browse-key">BROWSE</button>
+                                    </div>
+                                </div>
+                                <div class="form-group hidden" id="password-group">
+                                    <label for="password">PASSWORD</label>
+                                    <input type="password" id="password" name="password" placeholder="Enter password">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-test" id="test-connection">
+                                    <span class="btn-loading hidden"></span>
+                                    TEST CONNECTION
+                                </button>
+                                <button type="button" class="btn btn-ghost hidden" id="disconnect-btn">
+                                    DISCONNECT
+                                </button>
+                                <div class="connection-status" id="connection-status"></div>
+                            </div>
+                        </div>
+
+                        <!-- Application Config -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <span class="section-icon">⚙️</span>
+                                APPLICATION CONFIG
+                            </h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="domain">DOMAIN *</label>
+                                    <input type="text" id="domain" name="domain" placeholder="app.example.com" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="stack-type">STACK TYPE</label>
+                                    <select id="stack-type" name="type">
+                                        <option value="node">Node.js</option>
+                                        <option value="remix">Remix</option>
+                                        <option value="next">Next.js</option>
+                                        <option value="express">Express</option>
+                                        <option value="laravel">Laravel</option>
+                                        <option value="static">Static</option>
+                                        <option value="react">React</option>
+                                        <option value="vue">Vue</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="repo">REPOSITORY URL</label>
+                                    <input type="url" id="repo" name="repo" placeholder="https://github.com/user/repo">
+                                </div>
+                                <div class="form-group">
+                                    <label for="branch">BRANCH</label>
+                                    <input type="text" id="branch" name="branch" value="main" placeholder="main">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="database">DATABASE</label>
+                                    <select id="database" name="dbType">
+                                        <option value="">None</option>
+                                        <option value="mysql">MySQL</option>
+                                        <option value="postgres">PostgreSQL</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="enable-ssl" name="enableSsl" checked>
+                                        <span class="checkmark"></span>
+                                        ENABLE SSL (Let's Encrypt)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deploy Actions -->
+                    <div class="deploy-actions">
+                        <div class="action-buttons">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="dry-run" name="dryRun">
+                                <span class="checkmark"></span>
+                                DRY RUN (Preview only)
+                            </label>
+                            <button type="submit" class="btn btn-primary deploy-btn" id="deploy-btn">
+                                <span class="btn-loading hidden"></span>
+                                <span class="btn-text">DEPLOY</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Servers Tab -->
+            <section class="tab-content" id="servers-tab">
+                <div class="section-header">
+                    <h2>SERVER MANAGEMENT</h2>
+                    <p>Saved servers — auto-saved on successful connection</p>
+                </div>
+                <div class="servers-grid" id="servers-grid"></div>
+            </section>
+
+            <!-- Logs Tab -->
+            <section class="tab-content" id="logs-tab">
+                <div class="section-header">
+                    <h2>DEPLOYMENT LOGS</h2>
+                    <p>Real-time command output and execution history</p>
+                </div>
+                <div class="console" id="console">
+                    <div class="console-header">
+                        <div class="console-title">
+                            <span class="icon">⚡</span>
+                            DEPLOYMENT CONSOLE
+                        </div>
+                        <div class="console-controls">
+                            <button class="btn btn-ghost" id="copy-logs">COPY LOGS</button>
+                            <button class="btn btn-ghost" id="clear-console">CLEAR</button>
+                        </div>
+                    </div>
+                    <div class="console-content" id="console-content">
+                        <div class="console-line welcome">
+                            <span class="prompt">[DEPLOYBOT]</span>
+                            <span class="text">Ready for deployment commands...</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profiles Tab -->
+            <section class="tab-content" id="profiles-tab">
+                <div class="section-header">
+                    <h2>DEPLOYMENT PROFILES</h2>
+                    <p>Save and reuse full deployment configurations</p>
+                </div>
+                <div class="profiles-content">
+                    <div class="form-section" style="max-width:400px; margin-bottom:24px">
+                        <h3 class="section-title"><span class="section-icon">💾</span> SAVE CURRENT CONFIG</h3>
+                        <div class="form-group">
+                            <label for="profile-name">PROFILE NAME</label>
+                            <input type="text" id="profile-name" placeholder="e.g. production-app">
+                        </div>
+                        <div style="margin-top:12px">
+                            <button class="btn btn-secondary" id="save-profile-btn">SAVE PROFILE</button>
+                        </div>
+                    </div>
+                    <div class="servers-grid" id="profiles-list"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Progress Modal -->
+        <div class="modal hidden" id="progress-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>DEPLOYMENT IN PROGRESS</h3>
+                    <div class="progress-status" id="progress-status">Initializing...</div>
+                </div>
+                <div class="progress-console" id="progress-console">
+                    <!-- Real-time output will appear here -->
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancel-deploy" disabled>CANCEL</button>
+                    <button class="btn btn-primary hidden" id="close-progress">CLOSE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay -->
+        <div class="overlay hidden" id="overlay"></div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

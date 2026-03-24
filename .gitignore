@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Node / Electron
+node_modules/
+build/
+.cache/
+dist/
+out/
+
+# Credentials & secrets
+.env
+credentials.json
+*.key
+*.pem
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
