@@ -313,7 +313,8 @@ Install SSL Certificate (if needed):
 sudo certbot install --cert-name [your-domain]
 ```
 
-Auto-renew SSL certificate:
+Auto-renew SSL certificate: (Test SSL Auto-Renewal (Simulation))
+Run a safe simulation to verify if your certificate is configured correctly for future automatic renewals without making permanent changes:
 ```sh
 sudo certbot renew --dry-run
 ```
